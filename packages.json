@@ -1,0 +1,15 @@
+{
+    "wsh": {
+      "name": "WShell",
+      "description": "Print het welkomsbericht",
+      "url": "https://raw.githubusercontent.com/computer-wilco/wshell-commands/master/wsh",
+      "platforms": ["linux", "darwin"]
+    },
+    "wsh-win": {
+      "name": "WShell Windows",
+      "description": "Print het welkomsbericht op Windows",
+      "url": "https://raw.githubusercontent.com/computer-wilco/wshell-commands/master/wsh.bat",
+      "platforms": ["win32"]
+    }
+  }
+  
