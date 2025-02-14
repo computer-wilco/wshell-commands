@@ -1,0 +1,16 @@
+{
+  "name": "wpm",
+  "version": "1.0.0",
+  "description": "De package manager voor de WShell",
+  "main": "wpm.js",
+  "scripts": {
+    "update": "npx -y Jelmerro/nus",
+    "test": "node wpm.js"
+  },
+  "author": "Wilco Joosen",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "1.7.9",
+    "fs-extra": "11.3.0"
+  }
+}
