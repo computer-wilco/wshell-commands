@@ -1,11 +1,21 @@
 const { ensureDirSync, writeFileSync, chmodSync, existsSync, unlinkSync, readdirSync, readFileSync } = require('fs-extra');
-const { get } = require('axios');
+const https = require("https");
 const { join } = require('path');
 const { homedir, platform } = require('os');
 
 const REPO_URL = "https://raw.githubusercontent.com/computer-wilco/wshell-commands/master/packages.json";
 const INSTALL_DIR = join(homedir(), '.w-shell/bin');
 const PACKAGE_FILE = join(homedir(), '.w-shell/packages.json');
+
+function get(url) {
+    return new Promise((resolve, reject) => {
+      https.get(url, (res) => {
+        let data = "";
+        res.on("data", (chunk) => { data += chunk; });
+        res.on("end", () => resolve(data));
+      }).on("error", reject);
+    });
+}
 
 // Zorg dat de installatiemap en package-bestand bestaan
 ensureDirSync(INSTALL_DIR);
@@ -28,7 +38,8 @@ async function fetchPackages(useCache = true) {
     // Als er geen cache is of we willen updaten, haal online data op
     try {
         const response = await get(REPO_URL);
-        writeFileSync(PACKAGE_FILE, JSON.stringify(response.data, null, 2)); // Sla op
+        const jsonData = typeof response === "string" ? JSON.parse(response) : response;
+        writeFileSync(PACKAGE_FILE, JSON.stringify(jsonData, null, 2)); // Sla op
         return response.data;
     } catch (error) {
         console.error("Fout bij het ophalen van de pakketten:", error);
@@ -58,7 +69,7 @@ async function installPackage(packageName) {
 
     try {
         const file = await get(packageUrl, { responseType: 'arraybuffer' });
-        writeFileSync(filePath, file.data);
+        writeFileSync(filePath, file);
         chmodSync(filePath, 0o755); // Maak uitvoerbaar op Unix-systemen
         console.log(`'${packageName}' geïnstalleerd.'`);
     } catch (error) {
@@ -85,7 +96,7 @@ async function listPackages() {
     
     console.log("Beschikbare pakketten:");
     for (const [name, pkg] of Object.entries(packages)) {
-        console.log(`- ${name}: ${pkg.description} (${pkg.platforms.join(", ")})`);
+        console.log(`- ${name}: ${pkg.description}`);
     }
 
     console.log("\nGeïnstalleerde pakketten:");
@@ -107,6 +118,10 @@ const [,, command, packageName] = process.argv;
             if (!packageName) return console.log("Geef een pakketnaam op.");
             await installPackage(packageName);
             break;
+        case 'uninstall':
+            if (!packageName) return console.log("Geef een pakketnaam op.");
+            await removePackage(packageName);
+            break;
         case 'remove':
             if (!packageName) return console.log("Geef een pakketnaam op.");
             await removePackage(packageName);
@@ -118,6 +133,6 @@ const [,, command, packageName] = process.argv;
             await updatePackages();
             break;
         default:
-            console.log("Gebruik: wpm install <pakket> | wpm remove <pakket> | wpm list | wpm update");
+            console.log("Gebruik: wpm install <pakket> | wpm remove/uninstall <pakket> | wpm list | wpm update");
     }
 })();
