@@ -5,6 +5,10 @@
   "main": "wpm.js",
   "scripts": {
     "update": "npx -y Jelmerro/nus",
+    "build-linux": "pkg wpm.js --output wpm-linux --targets node18-linux-x64",
+    "build-macos": "pkg wpm.js --output wpm-macos --targets node18-macos-x64",
+    "build-win": "pkg wpm.js --output wpm-win.exe --targets node18-win-x64",
+    "build-all": "npm run build-linux && npm run build-macos && npm run build-win",
     "test": "node wpm.js"
   },
   "author": "Wilco Joosen",
